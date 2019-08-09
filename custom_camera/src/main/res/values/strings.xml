@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">custom_camera</string>
+    <string name="custom_camera_sure">确定</string>
+    <string name="custom_camera_cancel">取消</string>
+</resources>
