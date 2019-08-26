@@ -5,22 +5,30 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        tools:context=".ui.activity.MainActivity">
 
-    <TextView
-            android:id="@+id/tv_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            app:layout_constraintBottom_toBottomOf="parent"
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:id="@+id/btn_window"
+            android:text="全局Toast显示"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.zzmeng.customcamera.ui.widget.camera2.CameraView
-            android:id="@+id/cameraView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:id="@+id/btn_dialog"
+            app:layout_constraintLeft_toRightOf="@id/btn_window"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="全局对话框显示"/>
+
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:id="@+id/btn_wake"
+        android:text="语音唤醒"
+        app:layout_constraintLeft_toRightOf="@id/btn_dialog"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:id="@+id/btn_calendar"
+            android:text="日历控件"
+            app:layout_constraintLeft_toRightOf="@id/btn_wake"
+            app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

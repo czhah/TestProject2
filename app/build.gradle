@@ -33,4 +33,8 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation project(":custom_camera")
+    implementation project(":awaken")
+
+    //  日历控件
+    implementation 'com.haibin:calendarview:3.6.7'
 }

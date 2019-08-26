@@ -16,7 +16,7 @@ internal object BitmapUtils {
      * @return
      */
     fun getBitmapFromBytes(b: ByteArray, width: Int, height: Int): Bitmap? {
-        if (b.isEmpty()) return null
+        if (b == null) return null
         val degree = getBitmapDegree(b)
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true

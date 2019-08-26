@@ -1,1 +1,1 @@
-include ':app', ':custom_camera'
+include ':app', ':custom_camera', ':awaken'
