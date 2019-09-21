@@ -34,6 +34,10 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, IntentFilter(Constant.ACTION_SHOW))
 
         btn_calendar.setOnClickListener { startActivity(Intent(this, MyCalendarActivity::class.java)) }
+
+        btn_volume.setOnClickListener { startActivity(Intent(this, MyVolumeActivity::class.java)) }
+
+        btn_camera.setOnClickListener { startActivity(Intent(this, MyCameraActivity::class.java)) }
     }
 
 
