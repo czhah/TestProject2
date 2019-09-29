@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.dosmono.awaken.ui.activity.OneShotDemoActivity
@@ -38,6 +39,11 @@ class MainActivity : AppCompatActivity() {
         btn_volume.setOnClickListener { startActivity(Intent(this, MyVolumeActivity::class.java)) }
 
         btn_camera.setOnClickListener { startActivity(Intent(this, MyCameraActivity::class.java)) }
+
+        constraintLayout.setOnTouchListener { v, event ->
+            Log.d("cz", "ToolType:  "+event.getToolType(0))
+            true
+        }
     }
 
 

@@ -20,7 +20,7 @@ public interface ICamera {
 
     boolean switchCameraId();
 
-    void handleFocus(float x, float y);
+    void handleFocus(float x, float y, int count);
 
     void setFocusCallback(ICameraFocusCallback callback);
 

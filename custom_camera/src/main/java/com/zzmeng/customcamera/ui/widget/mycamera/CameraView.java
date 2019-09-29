@@ -1,26 +1,18 @@
 package com.zzmeng.customcamera.ui.widget.mycamera;
 
-import android.Manifest;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.*;
 import android.widget.RelativeLayout;
-import androidx.core.content.ContextCompat;
 import com.dosmono.customcamera.util.UIUtils;
-import com.zzmeng.customcamera.R;
-import com.zzmeng.customcamera.ui.widget.camera.base.Constants;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 如何注册相机相关的权限
@@ -57,6 +49,7 @@ public class CameraView extends RelativeLayout implements ICameraFocusCallback {
     private int mScreenHeight;
     private int mWidth;
     private int mHeight;
+    private SensorManager mSensorManger;
 
     public CameraView(Context context) {
         this(context, null);
@@ -109,6 +102,9 @@ public class CameraView extends RelativeLayout implements ICameraFocusCallback {
 
         addView(mSurfaceView, mSurfaceViewParams);
         addView(mFocusView, mFocusViewParams);
+
+        //  传感器
+        mSensorManger = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
     }
 
     @Override
@@ -124,13 +120,38 @@ public class CameraView extends RelativeLayout implements ICameraFocusCallback {
 
     public void onResume() {
         Log.d("Camera1", "onResume");
-
+        if(mSensorManger != null) {
+            mSensorManger.registerListener(mSensorEventListener, mSensorManger.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        }
     }
 
     public void onPause() {
         Log.d("Camera1", "onPause");
-
+        if(mSensorManger != null) {
+            mSensorManger.unregisterListener(mSensorEventListener);
+        }
     }
+
+    private SensorEventListener mSensorEventListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor == null) {
+                return;
+            }
+
+            if (Sensor.TYPE_ACCELEROMETER != event.sensor.getType()) {
+                return;
+            }
+            float[] values = event.values;
+            int angle = CameraUtils.INSTANCE.getSensorAngle(values[0], values[1]);
+            Log.d("Camera1", "==SensorEventListener x:"+values[0] + " y:"+values[1]+"  angle:"+angle);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
 
     /**
      * 拍照
@@ -171,7 +192,7 @@ public class CameraView extends RelativeLayout implements ICameraFocusCallback {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if(mCameraImp != null) {
-                    mCameraImp.handleFocus(x, y);
+                    mCameraImp.handleFocus(x, y, 0);
                     setupFocusViewAnim(x, y);
                 }
                 break;

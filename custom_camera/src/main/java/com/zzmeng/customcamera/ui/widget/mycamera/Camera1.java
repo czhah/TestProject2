@@ -14,10 +14,10 @@ import android.view.WindowManager;
 
 import androidx.core.content.ContextCompat;
 
-import com.dosmono.customcamera.util.UIUtils;
 import com.zzmeng.customcamera.ui.widget.camera.base.Constants;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -131,7 +131,7 @@ public class Camera1 implements ICamera{
                 mHolder = holder;
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.startPreview();
-//                mCamera.cancelAutoFocus();
+                mCamera.cancelAutoFocus();
                 mCamera.setAutoFocusMoveCallback(new AutoFocusMoveCallback() {
                     @Override
                     public void onAutoFocusMoving(boolean start, Camera camera) {
@@ -390,45 +390,67 @@ public class Camera1 implements ICamera{
     }
 
     @Override
-    public void handleFocus(final float x, final float y) {
-        if(mCamera != null) {
-            Camera.Parameters parameters = mCamera.getParameters();
-            List<Area> focusAreas = parameters.getFocusAreas();
-            if(focusAreas != null && !focusAreas.isEmpty()) {
-                Rect focusRect = calculateTapArea(x, y, UIUtils.INSTANCE.getScreenWidth(context), UIUtils.INSTANCE.getScreenHeight(context));
-                focusAreas.add(new Camera.Area(focusRect, 800));
-                parameters.setFocusAreas(focusAreas);
+    public void handleFocus(final float x, final float y, final int count) {
+        try {
+            if(mCamera != null) {
+                Camera.Parameters parameters = mCamera.getParameters();
+                Log.d(TAG, "handleFocus count:"+count+"  x:"+x +" y:"+y+"  mViewWidth:"+mViewWidth+"  mViewHeight:"+mViewHeight+"  "+parameters.getMaxNumFocusAreas());
+                if(isSupportAutoFocus(parameters) && parameters.getMaxNumFocusAreas() > 0) {
+                    List<Area> focusAreas = new ArrayList<>();
+                    Rect focusRect = calculateTapArea(x, y, mViewWidth, mViewHeight);
+                    focusAreas.add(new Camera.Area(focusRect, 800));
+                    parameters.setFocusAreas(focusAreas);
+                    final String currentFocusMode = parameters.getFocusMode();
+                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                    mCamera.cancelAutoFocus();
+                    mCamera.setParameters(parameters);
+                    mCamera.autoFocus(new AutoFocusCallback() {
+                        @Override
+                        public void onAutoFocus(boolean success, Camera camera) {
+                            Log.d(TAG, "onAutoFocus  success:"+success+"  count:"+count);
+                            if(success) {
+                                Camera.Parameters params = camera.getParameters();
+                                params.setFocusMode(currentFocusMode);
+                                camera.setParameters(params);
+                                mCamera.cancelAutoFocus();
 
-                mCamera.cancelAutoFocus();
+                                if(mFocusCallback != null) {
+                                    mFocusCallback.onAutoFocusMoving(false);
+                                }
+                            } else if(count == 4) {
+                                //  超过4次就不自动对焦
+                                Camera.Parameters params = camera.getParameters();
+                                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                camera.setParameters(params);
+                                mCamera.cancelAutoFocus();
 
-                final String currentFocusMode = parameters.getFocusMode();
-                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                mCamera.setParameters(parameters);
-                mCamera.autoFocus(new AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean success, Camera camera) {
-                        if(success) {
-                            Camera.Parameters params = camera.getParameters();
-                            params.setFocusMode(currentFocusMode);
-                            camera.setParameters(params);
-                            mCamera.cancelAutoFocus();
-
-                            if(mFocusCallback != null) {
-                                mFocusCallback.onAutoFocusMoving(false);
+                                if(mFocusCallback != null) {
+                                    mFocusCallback.onAutoFocusMoving(false);
+                                }
+                            } else {
+                                handleFocus(x, y, count + 1);
                             }
-                        } else {
-                            handleFocus(x, y);
                         }
-                    }
-                });
-            } else {
+                    });
+                    return ;
+                }
                 if(mFocusCallback != null) {
                     mFocusCallback.onAutoFocusMoving(false);
                 }
             }
+        }catch (Exception e) {
+            Log.e(TAG, "handle focus error:"+e.toString());
         }
     }
 
+    /**
+     * 触摸区域的四个点(-1000,-1000, 1000,-1000, -1000,1000, 1000,1000)
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return
+     */
     private static Rect calculateTapArea(float x, float y, int width, int height) {
         int areaSize = 300;
         int centerX = (int) (x / width * 2000 - 1000);
